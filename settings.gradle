@@ -1,0 +1,5 @@
+include ':app'
+rootProject.name = "AmharicOCR"
+include ':OpenCV'
+def openCVSDK = '../OpenCV-android-sdk'
+project(':OpenCV').projectDir = new File(openCVSDK+'/sdk')
