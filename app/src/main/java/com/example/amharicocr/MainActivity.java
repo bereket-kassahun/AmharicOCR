@@ -19,9 +19,15 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -71,7 +77,10 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 if(bitmap != null){
                     Mat tmp = convertBitmapToGray(bitmap);
-                    Bitmap tmp1 = createBitmapfromMat(tmp);
+                    Mat temp = otsuTreshold(tmp);
+                    List<MatOfPoint> matOfPoints = getContours(temp);
+                    drawRectangles(temp, matOfPoints);
+                    Bitmap tmp1 = createBitmapfromMat(temp);
                     preview.setImageBitmap(tmp1);
                 }
             }
@@ -96,6 +105,30 @@ public class MainActivity extends AppCompatActivity {
         return ret;
     }
 
+    private Mat otsuTreshold(Mat grayScaleImage){
+        Mat ret = new Mat (bitmap.getWidth(), bitmap.getHeight(), CvType.CV_8UC1);
+        Imgproc.threshold(grayScaleImage, ret,0,255, Imgproc.THRESH_OTSU | Imgproc.THRESH_BINARY_INV);
+        return ret;
+    }
+
+    private List<MatOfPoint> getContours(Mat thresholdImage){
+        Mat dilation = new Mat (bitmap.getWidth(), bitmap.getHeight(), CvType.CV_8UC1);
+        final Mat hierarchy = new Mat();
+        List<MatOfPoint> matOfPoints = new ArrayList<>();
+        Mat rect_kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(18, 18));
+        Imgproc.dilate(thresholdImage, dilation,rect_kernel);
+        Imgproc.findContours(dilation, matOfPoints, hierarchy,Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
+        return matOfPoints;
+    }
+
+    private void drawRectangles(Mat destination, List<MatOfPoint> contours){
+        Rect rect;
+        Scalar scalar = new Scalar(255,255,255);
+        for(MatOfPoint cnt : contours){
+            rect = Imgproc.boundingRect(cnt);
+            Imgproc.rectangle(destination, rect,scalar);
+        }
+    }
     public Bitmap createBitmapfromMat(Mat snap){
         Bitmap bp = Bitmap.createBitmap(snap.cols(), snap.rows(), Bitmap.Config.ARGB_8888);
         Utils.matToBitmap(snap, bp);
