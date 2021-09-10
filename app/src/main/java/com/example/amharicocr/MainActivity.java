@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.opencv.android.BaseLoaderCallback;
@@ -36,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private Button capture;
     private Button convert;
     private ImageView preview;
+    private TextView textView;
     private Bitmap bitmap = null;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
@@ -56,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
     };
 
 
+    private OCR ocr;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,6 +68,9 @@ public class MainActivity extends AppCompatActivity {
         capture = findViewById(R.id.capture);
         convert = findViewById(R.id.convert);
         preview = findViewById(R.id.preview);
+        textView = findViewById(R.id.textView);
+
+        ocr = new OCR(getApplicationContext(), "amh");
 
         capture.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -82,6 +89,8 @@ public class MainActivity extends AppCompatActivity {
                     drawRectangles(temp, matOfPoints);
                     Bitmap tmp1 = createBitmapfromMat(temp);
                     preview.setImageBitmap(tmp1);
+//                    Toast.makeText(getBaseContext(), ocr.getOCRResult(tmp1), Toast.LENGTH_LONG).show();
+                    textView.setText(ocr.getOCRResult(tmp1));
                 }
             }
         });
