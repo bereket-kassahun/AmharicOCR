@@ -1,6 +1,10 @@
 package com.example.amharicocr;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.navigation.ui.AppBarConfiguration;
+import androidx.navigation.ui.NavigationUI;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
@@ -13,6 +17,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
@@ -64,96 +70,47 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        BottomNavigationView navView = findViewById(R.id.bottom_navigation);
+        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(R.id.navigation_analysis).build();
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+
+        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
+        NavigationUI.setupWithNavController(navView, navController);
 //        SimpleSample.main(new String[2]);
-        capture = findViewById(R.id.capture);
-        convert = findViewById(R.id.convert);
-        preview = findViewById(R.id.preview);
-        textView = findViewById(R.id.textView);
-
-        ocr = new OCR(getApplicationContext(), "amh");
-
-        capture.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-               dispatchTakePictureIntent();
-            }
-        });
-
-        convert.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(bitmap != null){
-                    Mat tmp = convertBitmapToGray(bitmap);
-                    Mat temp = otsuTreshold(tmp);
-                    List<MatOfPoint> matOfPoints = getContours(temp);
-                    drawRectangles(temp, matOfPoints);
-                    Bitmap tmp1 = createBitmapfromMat(temp);
-                    preview.setImageBitmap(tmp1);
-//                    Toast.makeText(getBaseContext(), ocr.getOCRResult(tmp1), Toast.LENGTH_LONG).show();
-                    textView.setText(ocr.getOCRResult(tmp1));
-                }
-            }
-        });
+//        capture = findViewById(R.id.capture);
+//        convert = findViewById(R.id.convert);
+//        preview = findViewById(R.id.preview);
+//        textView = findViewById(R.id.textView);
+//
+//        ocr = new OCR(getApplicationContext(), "amh");
+//
+//        capture.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//               dispatchTakePictureIntent();
+//            }
+//        });
+//
+//        convert.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                if(bitmap != null){
+//                    Mat tmp = convertBitmapToGray(bitmap);
+//                    Mat temp = otsuTreshold(tmp);
+//                    List<MatOfPoint> matOfPoints = getContours(temp);
+//                    drawRectangles(temp, matOfPoints);
+//                    Bitmap tmp1 = createBitmapfromMat(temp);
+//                    preview.setImageBitmap(tmp1);
+////                    Toast.makeText(getBaseContext(), ocr.getOCRResult(tmp1), Toast.LENGTH_LONG).show();
+//                    textView.setText(ocr.getOCRResult(tmp1));
+//                }
+//            }
+//        });
     }
 
 
-    private void dispatchTakePictureIntent() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        try {
-            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-        } catch (ActivityNotFoundException e) {
-//            Toast.makeText(this, "unable to open camera app", Toast.LENGTH_LONG).show();
-            Log.e("error :", e.getMessage());
-        }
-    }
-    private Mat convertBitmapToGray(Bitmap bitmap){
-        Mat ret = new Mat (bitmap.getWidth(), bitmap.getHeight(), CvType.CV_8UC1);
-        Bitmap bmp32 = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-        Utils.bitmapToMat(bmp32, ret);
-        Imgproc.cvtColor(ret, ret, Imgproc.COLOR_RGB2GRAY);
-        return ret;
-    }
 
-    private Mat otsuTreshold(Mat grayScaleImage){
-        Mat ret = new Mat (bitmap.getWidth(), bitmap.getHeight(), CvType.CV_8UC1);
-        Imgproc.threshold(grayScaleImage, ret,0,255, Imgproc.THRESH_OTSU | Imgproc.THRESH_BINARY_INV);
-        return ret;
-    }
-
-    private List<MatOfPoint> getContours(Mat thresholdImage){
-        Mat dilation = new Mat (bitmap.getWidth(), bitmap.getHeight(), CvType.CV_8UC1);
-        final Mat hierarchy = new Mat();
-        List<MatOfPoint> matOfPoints = new ArrayList<>();
-        Mat rect_kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(18, 18));
-        Imgproc.dilate(thresholdImage, dilation,rect_kernel);
-        Imgproc.findContours(dilation, matOfPoints, hierarchy,Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
-        return matOfPoints;
-    }
-
-    private void drawRectangles(Mat destination, List<MatOfPoint> contours){
-        Rect rect;
-        Scalar scalar = new Scalar(255,255,255);
-        for(MatOfPoint cnt : contours){
-            rect = Imgproc.boundingRect(cnt);
-            Imgproc.rectangle(destination, rect,scalar);
-        }
-    }
-    public Bitmap createBitmapfromMat(Mat snap){
-        Bitmap bp = Bitmap.createBitmap(snap.cols(), snap.rows(), Bitmap.Config.ARGB_8888);
-        Utils.matToBitmap(snap, bp);
-        return bp;
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            Bundle extras = data.getExtras();
-            Bitmap imageBitmap = (Bitmap) extras.get("data");
-            bitmap = imageBitmap;
-            preview.setImageBitmap(imageBitmap);
-        }
-    }
     @Override
     public void onResume()
     {
