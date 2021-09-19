@@ -13,6 +13,8 @@ android {
         versionCode 1
         versionName "1.0"
 
+
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -35,6 +37,7 @@ dependencies {
     implementation 'androidx.navigation:navigation-fragment:2.3.5'
     implementation 'androidx.navigation:navigation-ui:2.3.5'
     implementation files('libs/poishadow-all.jar')
+    implementation files('libs\\lipermi-1.0.1.jar')
     testImplementation 'junit:junit:4.+'
     implementation project(path: ':OpenCV')
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

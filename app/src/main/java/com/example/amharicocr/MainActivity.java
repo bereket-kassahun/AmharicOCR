@@ -12,7 +12,9 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -21,7 +23,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.amharicocr.rmi.TestService;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import net.sf.lipermi.handler.CallHandler;
+import net.sf.lipermi.net.Client;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
@@ -35,6 +41,7 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,12 +56,13 @@ static {
     System.setProperty("org.apache.poi.javax.xml.stream.XMLEventFactory", "com.fasterxml.aalto.stax.EventFactoryImpl");}
     static final int REQUEST_IMAGE_CAPTURE = 1;
     static final int REQUEST_APP_PERMISSION = 2;
+    private String serverIP = "10.4.18.18";
 
-    private Button capture;
-    private Button convert;
-    private ImageView preview;
-    private TextView textView;
-    private Bitmap bitmap = null;
+    private Button rmitry;
+//    private Button convert;
+//    private ImageView preview;
+//    private TextView textView;
+//    private Bitmap bitmap = null;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -87,6 +95,13 @@ static {
 
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
+        rmitry = findViewById(R.id.rmitry);
+        rmitry.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new Conn().execute();
+            }
+        });
 //        SimpleSample.main(new String[2]);
 //        capture = findViewById(R.id.capture);
 //        convert = findViewById(R.id.convert);
@@ -159,6 +174,26 @@ static {
         }
     }
 
+    class Conn extends AsyncTask<Void, Void, MainActivity> {
 
+        @Override
+        protected MainActivity doInBackground(Void... params) {
+            Looper.prepare();
+            try {
+                CallHandler callHandler = new CallHandler();
+                Client client = new Client(serverIP, 7777, callHandler);
+                TestService testService = (TestService) client.getGlobal(TestService.class);
+                String msg = testService.getResponse("qwe");
+                //Toast.makeText(MainActivity.this, testService.getResponse("abc"), Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
+                client.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Looper.loop();
+            return null;
+        }
+
+    }
 
 }
