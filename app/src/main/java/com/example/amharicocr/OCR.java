@@ -3,7 +3,9 @@ package com.example.amharicocr;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
+import android.graphics.pdf.PdfRenderer;
 import android.os.Environment;
+import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -12,6 +14,7 @@ import com.googlecode.tesseract.android.TessBaseAPI;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 public class OCR {
 
@@ -92,4 +95,6 @@ public class OCR {
     public void onDestroy() {
         if (mTess != null) mTess.end();
     }
+
+
 }
