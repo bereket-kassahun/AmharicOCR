@@ -1,60 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.flexbox.FlexboxLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".ui.analysis.AnalysisFragment"
-    app:flexDirection="column"
-    app:alignContent="stretch"
-
-    app:alignItems="flex_end"
-    app:justifyContent="space_between">
-
-    <EditText
-        android:id="@+id/textView"
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:inputType="text|textMultiLine"
-        android:gravity="top"/>
-
-    <ImageView
-        android:id="@+id/preview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_flexGrow="1"
-        android:adjustViewBounds="true"/>
-
+    android:layout_height="match_parent">
 
     <com.google.android.flexbox.FlexboxLayout
+
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:flexWrap="wrap"
-        app:alignItems="center"
-        app:alignContent="space_between"
-        app:justifyContent="space_around">
+        android:layout_height="match_parent"
+        app:alignContent="stretch"
+        app:alignItems="flex_end"
+        app:flexDirection="column"
 
-        <Button
-            android:id="@+id/capture"
-            android:layout_width="150dp"
-            android:layout_height="50dp"
-            app:layout_alignSelf="center"
-            android:text="Capture" />
+        app:justifyContent="space_between"
+        tools:context=".ui.analysis.AnalysisFragment">
 
-        <Button
-            android:id="@+id/from_internal_storage"
-            android:layout_width="150dp"
-            android:layout_height="50dp"
-            app:layout_alignSelf="center"
-            android:text="Pick File" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <EditText
+                android:id="@+id/textView"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:gravity="top"
+                android:inputType="text|textMultiLine" />
+
+            <Button
+                android:layout_gravity="center_horizontal"
+                android:id="@+id/btn_save"
+                android:enabled="false"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Save" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/preview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:scaleType="centerCrop"
+            app:layout_flexGrow="1" />
 
 
-        <Button
-            android:id="@+id/convert"
-            android:layout_width="150dp"
-            android:layout_height="50dp"
-            android:text="Convert"/>
+        <com.google.android.flexbox.FlexboxLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:alignContent="space_between"
+            app:alignItems="center"
+            app:flexWrap="wrap"
+            app:justifyContent="space_around">
 
+            <Button
+                android:id="@+id/capture"
+                android:layout_width="150dp"
+                android:layout_height="50dp"
+                android:text="Capture"
+                app:layout_alignSelf="center" />
+
+            <Button
+                android:id="@+id/from_internal_storage"
+                android:layout_width="150dp"
+                android:layout_height="50dp"
+                android:text="Pick File"
+                app:layout_alignSelf="center" />
+
+
+            <Button
+                android:id="@+id/convert"
+                android:layout_width="150dp"
+                android:layout_height="50dp"
+                android:text="Convert" />
+
+        </com.google.android.flexbox.FlexboxLayout>
     </com.google.android.flexbox.FlexboxLayout>
-</com.google.android.flexbox.FlexboxLayout>
+</ScrollView>
