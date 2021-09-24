@@ -41,10 +41,13 @@ import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.example.amharicocr.MainActivityViewModel;
 import com.example.amharicocr.OCR;
 import com.example.amharicocr.R;
 
@@ -80,7 +83,7 @@ import com.google.gson.Gson;
 
 class RecentsList{
     static final String RECENTS_KEY = "recents";
-    static void add(Context context,String path){
+    static void add(Context context, String path){
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = prefs.edit();
 
@@ -106,7 +109,6 @@ class RecentsList{
             ret.add(s);
             Log.e("XXXX",s);
         }
-
         return ret;
     }
 }
@@ -116,7 +118,7 @@ public class AnalysisFragment extends Fragment {
     private OCR ocr;
     static final int REQUEST_IMAGE_CAPTURE = 1;
     static final int REQUEST_GET_FILE = 2;
-    private AnalysisViewModel dashboardViewModel;
+    private MainActivityViewModel mainActivityViewModel;
 
     private Button capture;
     private Button pick;
@@ -128,7 +130,7 @@ public class AnalysisFragment extends Fragment {
 
     int finalHeight = 300, finalWidth = 300;
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        dashboardViewModel = new ViewModelProvider(this).get(AnalysisViewModel.class);
+        mainActivityViewModel  = new ViewModelProvider(requireActivity()).get(MainActivityViewModel.class);
         View root = inflater.inflate(R.layout.analysis_fragment, container, false);
 
         capture = root.findViewById(R.id.capture);
@@ -138,7 +140,21 @@ public class AnalysisFragment extends Fragment {
         textView = root.findViewById(R.id.textView);
         btnSave = root.findViewById(R.id.btn_save);
 
-        ocr = new OCR(getContext(), "amh");
+//        ocr = new OCR(getContext(), "amh");
+
+        mainActivityViewModel.getImage().observe(getViewLifecycleOwner(), new Observer<Bitmap>() {
+            @Override
+            public void onChanged(Bitmap bitmap) {
+                preview.setImageBitmap(bitmap);
+                Toast.makeText(getContext(), "lifecycle changed", Toast.LENGTH_SHORT).show();
+            }
+        });
+        mainActivityViewModel.getOcr().observe(getViewLifecycleOwner(), new Observer<OCR>() {
+            @Override
+            public void onChanged(OCR ocr_) {
+                ocr = ocr_;
+            }
+        });
 
         capture.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -164,9 +180,11 @@ public class AnalysisFragment extends Fragment {
                     drawRectangles(temp, matOfPoints);
                     Bitmap tmp1 = createBitmapfromMat(temp);
                     preview.setImageBitmap(tmp1);
+                    mainActivityViewModel.setImage(tmp1);
 //                    Toast.makeText(getBaseContext(), ocr.getOCRResult(tmp1), Toast.LENGTH_LONG).show();
                     String t = ocr.getOCRResult(tmp1);
                     textView.setText(t);
+                    mainActivityViewModel.setResult(t);
 
                     if(!t.isEmpty()){
                         btnSave.setEnabled(true);
@@ -264,6 +282,7 @@ public class AnalysisFragment extends Fragment {
 
 
 
+
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         try {
@@ -321,6 +340,7 @@ public class AnalysisFragment extends Fragment {
                 Bitmap imageBitmap = (Bitmap) extras.get("data");
                 bitmap = imageBitmap;
                 preview.setImageBitmap(imageBitmap);
+                mainActivityViewModel.setImage(imageBitmap);
 
         } else if(requestCode == REQUEST_GET_FILE && resultCode == RESULT_OK){
             Uri uri = null;
@@ -368,6 +388,7 @@ public class AnalysisFragment extends Fragment {
                 Bitmap resizedBitmap = getResizedBitmap(bitmap, finalHeight, finalWidth);
 
                 preview.setImageBitmap(resizedBitmap);
+                mainActivityViewModel.setImage(resizedBitmap);
 
             } else {
                 Toast.makeText(getContext(), "intent data is null", Toast.LENGTH_LONG).show();
@@ -560,6 +581,8 @@ public class AnalysisFragment extends Fragment {
     public static boolean isMediaDocument(Uri uri) {
         return "com.android.providers.media.documents".equals(uri.getAuthority());
     }
+
+
 
     private void saveAsPdf(String str, String path){
         PdfDocument document = new PdfDocument();

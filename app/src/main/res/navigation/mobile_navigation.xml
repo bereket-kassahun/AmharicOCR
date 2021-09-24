@@ -11,11 +11,11 @@
         android:label="@string/analysis"
         tools:layout="@layout/analysis_fragment" />
 
-<!--    <fragment-->
-<!--        android:id="@+id/navigation_dashboard"-->
-<!--        android:name="com.example.test_tab.ui.dashboard.DashboardFragment"-->
-<!--        android:label="@string/title_dashboard"-->
-<!--        tools:layout="@layout/fragment_dashboard" />-->
+    <fragment
+        android:id="@+id/navigation_editor"
+        android:name="com.example.amharicocr.ui.editor.Editor"
+        android:label="@string/title_edior"
+        tools:layout="@layout/editor_fragment" />
 
 <!--    <fragment-->
 <!--        android:id="@+id/navigation_notifications"-->

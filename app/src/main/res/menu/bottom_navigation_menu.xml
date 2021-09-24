@@ -5,11 +5,11 @@
         android:enabled="true"
         android:icon="@drawable/ic_baseline_home_24"
         android:title="@string/analysis"/>
-<!--    <item-->
-<!--        android:id="@+id/page_2"-->
-<!--        android:enabled="true"-->
-<!--        android:icon="@drawable/ic_baseline_history_24"-->
-<!--        android:title="@string/activity"/>-->
+    <item
+        android:id="@+id/navigation_editor"
+        android:enabled="true"
+        android:icon="@drawable/ic_baseline_history_24"
+        android:title="@string/title_edior"/>
 <!--    <item-->
 <!--        android:id="@+id/page_3"-->
 <!--        android:enabled="true"-->

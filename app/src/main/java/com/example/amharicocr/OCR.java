@@ -21,6 +21,8 @@ public class OCR {
     private final TessBaseAPI mTess;
 
     public OCR(Context context, String language) {
+
+        Toast.makeText(context, "OCR initializing", Toast.LENGTH_SHORT).show();
         mTess = new TessBaseAPI();
         boolean fileExistFlag = false;
 

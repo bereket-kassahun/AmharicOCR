@@ -2,6 +2,7 @@ package com.example.amharicocr;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -53,10 +54,13 @@ static {
     System.setProperty("javax.xml.stream.XMLEventFactory", "com.fasterxml.aalto.stax.EventFactoryImpl");
     System.setProperty("org.apache.poi.javax.xml.stream.XMLInputFactory", "com.fasterxml.aalto.stax.InputFactoryImpl");
     System.setProperty("org.apache.poi.javax.xml.stream.XMLOutputFactory", "com.fasterxml.aalto.stax.OutputFactoryImpl");
-    System.setProperty("org.apache.poi.javax.xml.stream.XMLEventFactory", "com.fasterxml.aalto.stax.EventFactoryImpl");}
+    System.setProperty("org.apache.poi.javax.xml.stream.XMLEventFactory", "com.fasterxml.aalto.stax.EventFactoryImpl");
+    }
+
+    private MainActivityViewModel mainActivityViewModel;
     static final int REQUEST_IMAGE_CAPTURE = 1;
     static final int REQUEST_APP_PERMISSION = 2;
-    private String serverIP = "10.4.18.18";
+    private String serverIP = "192.168.43.116";
 
     private Button rmitry;
 //    private Button convert;
@@ -95,13 +99,14 @@ static {
 
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
-        rmitry = findViewById(R.id.rmitry);
-        rmitry.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new Conn().execute();
-            }
-        });
+        mainActivityViewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
+//        rmitry = findViewById(R.id.rmitry);
+//        rmitry.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                new Conn().execute();
+//            }
+//        });
 //        SimpleSample.main(new String[2]);
 //        capture = findViewById(R.id.capture);
 //        convert = findViewById(R.id.convert);
@@ -132,7 +137,8 @@ static {
 //                }
 //            }
 //        });
-
+        OCR ocr = new OCR(getApplicationContext(), "amh");
+        mainActivityViewModel.setOcr(ocr);
         ActivityCompat.requestPermissions(MainActivity.this,
                 new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.CAMERA},
                 REQUEST_APP_PERMISSION);
@@ -141,6 +147,7 @@ static {
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case REQUEST_APP_PERMISSION: {
                 boolean isPermissionMissing = false;
@@ -183,10 +190,10 @@ static {
                 CallHandler callHandler = new CallHandler();
                 Client client = new Client(serverIP, 7777, callHandler);
                 TestService testService = (TestService) client.getGlobal(TestService.class);
-                String msg = testService.getResponse("qwe");
+                String msg = testService.getResponse("what the hell is wrong with u (:-()");
                 //Toast.makeText(MainActivity.this, testService.getResponse("abc"), Toast.LENGTH_SHORT).show();
                 Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
-                client.close();
+//                client.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }

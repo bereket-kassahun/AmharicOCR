@@ -1,5 +1,7 @@
 import java.io.IOException;
 import java.net.Socket;
+
+import com.example.amharicocr.rmi.TestService;
 import net.sf.lipermi.exception.LipeRMIException;
 import net.sf.lipermi.handler.CallHandler;
 import net.sf.lipermi.net.IServerListener;

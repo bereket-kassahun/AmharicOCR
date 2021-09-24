@@ -1,20 +1,24 @@
 package com.example.amharicocr.ui.analysis;
 
 
+import android.graphics.Bitmap;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 public class AnalysisViewModel extends ViewModel {
 
-    private MutableLiveData<String> mText;
+//    private MutableLiveData<String> mText;
+    private MutableLiveData<Bitmap> image;
 
     public AnalysisViewModel() {
-        mText = new MutableLiveData<>();
-        mText.setValue("This is dashboard fragment");
+        image = new MutableLiveData<Bitmap>();
     }
-
-    public LiveData<String> getText() {
-        return mText;
+    public void setImage(Bitmap image){
+        this.image.setValue(image);
+    }
+    public LiveData<Bitmap> getImage() {
+        return image;
     }
 }
