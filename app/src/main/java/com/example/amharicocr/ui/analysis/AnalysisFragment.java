@@ -78,6 +78,8 @@ import static java.security.AccessController.getContext;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
+
+import com.example.amharicocr.ui.documents.DocumentItem;
 import com.obsez.android.lib.filechooser.ChooserDialog;
 import com.google.gson.Gson;
 
@@ -127,6 +129,7 @@ public class AnalysisFragment extends Fragment {
     private ImageView preview;
     private TextView textView;
     private Bitmap bitmap = null;
+    private List<DocumentItem> items = new ArrayList<>();
 
     int finalHeight = 300, finalWidth = 300;
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -147,6 +150,13 @@ public class AnalysisFragment extends Fragment {
             public void onChanged(Bitmap bitmap) {
                 preview.setImageBitmap(bitmap);
                 Toast.makeText(getContext(), "lifecycle changed", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        mainActivityViewModel.getDocuments().observe(getViewLifecycleOwner(), new Observer<List<DocumentItem>>() {
+            @Override
+            public void onChanged(List<DocumentItem> documentItems) {
+                items = documentItems;
             }
         });
         mainActivityViewModel.getOcr().observe(getViewLifecycleOwner(), new Observer<OCR>() {
@@ -184,8 +194,12 @@ public class AnalysisFragment extends Fragment {
 //                    Toast.makeText(getBaseContext(), ocr.getOCRResult(tmp1), Toast.LENGTH_LONG).show();
                     String t = ocr.getOCRResult(tmp1);
                     textView.setText(t);
+
                     mainActivityViewModel.setResult(t);
 
+                    DocumentItem i = new DocumentItem(t, new Date().toString());
+                    items.add(i);
+                    mainActivityViewModel.setDocuments(items);
                     if(!t.isEmpty()){
                         btnSave.setEnabled(true);
                     }

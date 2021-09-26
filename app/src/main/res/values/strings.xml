@@ -6,4 +6,6 @@
     <string name="profile">Profile</string>
     <string name="analysis">Analysis</string>
     <string name="title_edior">Edit</string>
+    <string name="title_documents">Documents</string>
+    <string name="vertical_ellipsis">&#8942;</string>
 </resources>

@@ -25,6 +25,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.amharicocr.rmi.TestService;
+import com.example.amharicocr.sharedpreference.SharedPreference;
+import com.example.amharicocr.ui.documents.DocumentItem;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import net.sf.lipermi.handler.CallHandler;
@@ -48,14 +50,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-static {
-    System.setProperty("javax.xml.stream.XMLInputFactory", "com.fasterxml.aalto.stax.InputFactoryImpl");
-    System.setProperty("javax.xml.stream.XMLOutputFactory", "com.fasterxml.aalto.stax.OutputFactoryImpl");
-    System.setProperty("javax.xml.stream.XMLEventFactory", "com.fasterxml.aalto.stax.EventFactoryImpl");
-    System.setProperty("org.apache.poi.javax.xml.stream.XMLInputFactory", "com.fasterxml.aalto.stax.InputFactoryImpl");
-    System.setProperty("org.apache.poi.javax.xml.stream.XMLOutputFactory", "com.fasterxml.aalto.stax.OutputFactoryImpl");
-    System.setProperty("org.apache.poi.javax.xml.stream.XMLEventFactory", "com.fasterxml.aalto.stax.EventFactoryImpl");
-    }
+    static {
+        System.setProperty("javax.xml.stream.XMLInputFactory", "com.fasterxml.aalto.stax.InputFactoryImpl");
+        System.setProperty("javax.xml.stream.XMLOutputFactory", "com.fasterxml.aalto.stax.OutputFactoryImpl");
+        System.setProperty("javax.xml.stream.XMLEventFactory", "com.fasterxml.aalto.stax.EventFactoryImpl");
+        System.setProperty("org.apache.poi.javax.xml.stream.XMLInputFactory", "com.fasterxml.aalto.stax.InputFactoryImpl");
+        System.setProperty("org.apache.poi.javax.xml.stream.XMLOutputFactory", "com.fasterxml.aalto.stax.OutputFactoryImpl");
+        System.setProperty("org.apache.poi.javax.xml.stream.XMLEventFactory", "com.fasterxml.aalto.stax.EventFactoryImpl");
+        }
 
     private MainActivityViewModel mainActivityViewModel;
     static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -87,7 +89,7 @@ static {
 
 
     private OCR ocr;
-
+    SharedPreference preference;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,6 +102,12 @@ static {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
         mainActivityViewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
+        preference = new SharedPreference(getApplicationContext());
+        List<DocumentItem> items = preference.getList();
+        if(items == null){
+            items = new ArrayList<DocumentItem>();
+        }
+        mainActivityViewModel.setDocuments(items);
 //        rmitry = findViewById(R.id.rmitry);
 //        rmitry.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -203,4 +211,16 @@ static {
 
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        preference.setList(mainActivityViewModel.getLists());
+        Log.e("++++++++++++", mainActivityViewModel.getLists().size()+ "nice ");
+    }
 }

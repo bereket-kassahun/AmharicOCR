@@ -16,7 +16,11 @@
         android:name="com.example.amharicocr.ui.editor.Editor"
         android:label="@string/title_edior"
         tools:layout="@layout/editor_fragment" />
-
+    <fragment
+        android:id="@+id/navigation_documents"
+        android:name="com.example.amharicocr.ui.documents.DocumentsFragment"
+        android:label="@string/title_documents"
+        tools:layout="@layout/documents_fragment" />
 <!--    <fragment-->
 <!--        android:id="@+id/navigation_notifications"-->
 <!--        android:name="com.example.test_tab.ui.notifications.NotificationsFragment"-->

@@ -7,17 +7,26 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.example.amharicocr.sharedpreference.SharedPreference;
+import com.example.amharicocr.ui.documents.DocumentItem;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class MainActivityViewModel extends ViewModel {
 
     //    private MutableLiveData<String> mText;
     private MutableLiveData<Bitmap> image;
     private MutableLiveData<String> result;
     private MutableLiveData<OCR> ocr_;
+    private MutableLiveData<List<DocumentItem>> documents;
 
     public MainActivityViewModel() {
         image = new MutableLiveData<Bitmap>();
         result = new MutableLiveData<>();
         ocr_ = new MutableLiveData<>();
+        documents = new MutableLiveData<>();
+        documents.setValue(new ArrayList<DocumentItem>());
     }
     public void setImage(Bitmap image){
         this.image.setValue(image);
@@ -40,4 +49,13 @@ public class MainActivityViewModel extends ViewModel {
         return ocr_;
     }
 
+    public void setDocuments(List<DocumentItem> documents){
+        this.documents.setValue(documents);
+    }
+    public LiveData<List<DocumentItem>> getDocuments(){
+        return documents;
+    }
+    public List<DocumentItem> getLists(){
+        return documents.getValue();
+    }
 }
