@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -17,6 +18,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.pdf.PdfDocument;
 import android.graphics.pdf.PdfRenderer;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -47,6 +49,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.example.amharicocr.MainActivity;
 import com.example.amharicocr.MainActivityViewModel;
 import com.example.amharicocr.OCR;
 import com.example.amharicocr.R;
@@ -82,38 +85,38 @@ import org.apache.poi.xwpf.usermodel.XWPFRun;
 import com.example.amharicocr.ui.documents.DocumentItem;
 import com.obsez.android.lib.filechooser.ChooserDialog;
 import com.google.gson.Gson;
-
-class RecentsList{
-    static final String RECENTS_KEY = "recents";
-    static void add(Context context, String path){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        SharedPreferences.Editor editor = prefs.edit();
-
-        Gson gson = new Gson();
-        List<String> textList = new ArrayList<String>(get(context));
-        textList.remove(path); // prevent duplicates
-        textList.add(path);
-        String jsonText = gson.toJson(textList);
-        editor.putString(RECENTS_KEY, jsonText);
-        editor.apply();
-    }
-    static ArrayList<String> get(Context context){
-        ArrayList<String> ret = new ArrayList<>();
-        Gson gson = new Gson();
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        String jsonText = prefs.getString(RECENTS_KEY, null);
-        String[] text = gson.fromJson(jsonText, String[].class);
-
-        if(text == null) text = new String[]{};
-
-        Log.e("XXXX","recents now contains: ");
-        for(String s: text) {
-            ret.add(s);
-            Log.e("XXXX",s);
-        }
-        return ret;
-    }
-}
+//
+//class RecentsList{
+//    static final String RECENTS_KEY = "recents";
+//    static void add(Context context, String path){
+//        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+//        SharedPreferences.Editor editor = prefs.edit();
+//
+//        Gson gson = new Gson();
+//        List<String> textList = new ArrayList<String>(get(context));
+//        textList.remove(path); // prevent duplicates
+//        textList.add(path);
+//        String jsonText = gson.toJson(textList);
+//        editor.putString(RECENTS_KEY, jsonText);
+//        editor.apply();
+//    }
+//    static ArrayList<String> get(Context context){
+//        ArrayList<String> ret = new ArrayList<>();
+//        Gson gson = new Gson();
+//        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+//        String jsonText = prefs.getString(RECENTS_KEY, null);
+//        String[] text = gson.fromJson(jsonText, String[].class);
+//
+//        if(text == null) text = new String[]{};
+//
+//        Log.e("XXXX","recents now contains: ");
+//        for(String s: text) {
+//            ret.add(s);
+//            Log.e("XXXX",s);
+//        }
+//        return ret;
+//    }
+//}
 
 public class AnalysisFragment extends Fragment {
 
@@ -125,9 +128,9 @@ public class AnalysisFragment extends Fragment {
     private Button capture;
     private Button pick;
     private Button convert;
-    private Button btnSave;
+//    private Button btnSave;
     private ImageView preview;
-    private TextView textView;
+//    private TextView textView;
     private Bitmap bitmap = null;
     private List<DocumentItem> items = new ArrayList<>();
 
@@ -140,15 +143,16 @@ public class AnalysisFragment extends Fragment {
         pick  = root.findViewById(R.id.from_internal_storage);
         convert = root.findViewById(R.id.convert);
         preview = root.findViewById(R.id.preview);
-        textView = root.findViewById(R.id.textView);
-        btnSave = root.findViewById(R.id.btn_save);
+//        textView = root.findViewById(R.id.textView);
+//        btnSave = root.findViewById(R.id.btn_save);
 
 //        ocr = new OCR(getContext(), "amh");
 
         mainActivityViewModel.getImage().observe(getViewLifecycleOwner(), new Observer<Bitmap>() {
             @Override
-            public void onChanged(Bitmap bitmap) {
-                preview.setImageBitmap(bitmap);
+            public void onChanged(Bitmap bitmap_) {
+                preview.setImageBitmap(bitmap_);
+                bitmap = bitmap_;
                 Toast.makeText(getContext(), "lifecycle changed", Toast.LENGTH_SHORT).show();
             }
         });
@@ -192,17 +196,18 @@ public class AnalysisFragment extends Fragment {
                     preview.setImageBitmap(tmp1);
                     mainActivityViewModel.setImage(tmp1);
 //                    Toast.makeText(getBaseContext(), ocr.getOCRResult(tmp1), Toast.LENGTH_LONG).show();
-                    String t = ocr.getOCRResult(tmp1);
-                    textView.setText(t);
+                    String t = ocr.getOCRResult(bitmap);
+//                    textView.setText(t);
 
                     mainActivityViewModel.setResult(t);
 
                     DocumentItem i = new DocumentItem(t, new Date().toString());
                     items.add(i);
                     mainActivityViewModel.setDocuments(items);
-                    if(!t.isEmpty()){
-                        btnSave.setEnabled(true);
-                    }
+                    MainActivity.setNavigation(R.id.navigation_editor);
+//                    if(!t.isEmpty()){
+////                        btnSave.setEnabled(true);
+//                    }
                 }
             }
         });
@@ -214,72 +219,72 @@ public class AnalysisFragment extends Fragment {
 //            }
 //        });
 
-        btnSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String text = textView.getText().toString();
-                Log.e("XXXX","saving: "+ text);
-
-                // setup the alert builder
-                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                builder.setTitle("Save as");
-                builder.setMessage("What format do you want to save this text?");
-
-                // add the buttons
-                builder.setNegativeButton("txt", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        new ChooserDialog(getContext())
-                                // to handle the result(s)
-                                .withFilter(true, true)
-                                .withChosenListener(new ChooserDialog.Result() {
-                                    @Override
-                                    public void onChoosePath(String path, File pathFile) {
-                                        saveAsTxt(text,path);
-                                    }
-                                })
-                                .build()
-                                .show();
-                    }
-                });
-                builder.setNeutralButton("doc", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        new ChooserDialog(getContext())
-                                // to handle the result(s)
-                                .withFilter(true, true)
-                                .withChosenListener(new ChooserDialog.Result() {
-                                    @Override
-                                    public void onChoosePath(String path, File pathFile) {
-                                        saveAsDoc(text,path);
-                                    }
-                                })
-                                .build()
-                                .show();
-                    }
-                });
-                builder.setPositiveButton("pdf", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        new ChooserDialog(getContext())
-                                // to handle the result(s)
-                                .withFilter(true, true)
-                                .withChosenListener(new ChooserDialog.Result() {
-                                    @Override
-                                    public void onChoosePath(String path, File pathFile) {
-                                        saveAsPdf(text,path);
-                                    }
-                                })
-                                .build()
-                                .show();
-                    }
-                });
-
-                // create and show the alert dialog
-                AlertDialog dialog = builder.create();
-                dialog.show();
-            }
-        });
+//        btnSave.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                String text = textView.getText().toString();
+//                Log.e("XXXX","saving: "+ text);
+//
+//                // setup the alert builder
+//                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+//                builder.setTitle("Save as");
+//                builder.setMessage("What format do you want to save this text?");
+//
+//                // add the buttons
+//                builder.setNegativeButton("txt", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        new ChooserDialog(getContext())
+//                                // to handle the result(s)
+//                                .withFilter(true, true)
+//                                .withChosenListener(new ChooserDialog.Result() {
+//                                    @Override
+//                                    public void onChoosePath(String path, File pathFile) {
+//                                        saveAsTxt(text,path);
+//                                    }
+//                                })
+//                                .build()
+//                                .show();
+//                    }
+//                });
+//                builder.setNeutralButton("doc", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        new ChooserDialog(getContext())
+//                                // to handle the result(s)
+//                                .withFilter(true, true)
+//                                .withChosenListener(new ChooserDialog.Result() {
+//                                    @Override
+//                                    public void onChoosePath(String path, File pathFile) {
+//                                        saveAsDoc(text,path);
+//                                    }
+//                                })
+//                                .build()
+//                                .show();
+//                    }
+//                });
+//                builder.setPositiveButton("pdf", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        new ChooserDialog(getContext())
+//                                // to handle the result(s)
+//                                .withFilter(true, true)
+//                                .withChosenListener(new ChooserDialog.Result() {
+//                                    @Override
+//                                    public void onChoosePath(String path, File pathFile) {
+//                                        saveAsPdf(text,path);
+//                                    }
+//                                })
+//                                .build()
+//                                .show();
+//                    }
+//                });
+//
+//                // create and show the alert dialog
+//                AlertDialog dialog = builder.create();
+//                dialog.show();
+//            }
+//        });
         ViewTreeObserver vto = preview.getViewTreeObserver();
         vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             public boolean onPreDraw() {
@@ -296,15 +301,24 @@ public class AnalysisFragment extends Fragment {
 
 
 
-
+    Uri imageUri;
     private void dispatchTakePictureIntent() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        try {
-            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-        } catch (ActivityNotFoundException e) {
-//            Toast.makeText(this, "unable to open camera app", Toast.LENGTH_LONG).show();
-            Log.e("error :", e.getMessage());
-        }
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.TITLE, "New Picture");
+        values.put(MediaStore.Images.Media.DESCRIPTION, "From your Camera");
+        imageUri = getContext().getContentResolver().insert(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+        startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
+
+//        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+//        try {
+//            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+//        } catch (ActivityNotFoundException e) {
+////            Toast.makeText(this, "unable to open camera app", Toast.LENGTH_LONG).show();
+//            Log.e("error :", e.getMessage());
+//        }
     }
 
     private Mat convertBitmapToGray(Bitmap bitmap){
@@ -345,16 +359,68 @@ public class AnalysisFragment extends Fragment {
         return bp;
     }
 
+    public String getRealPathFromURI(Uri contentUri) {
+        String[] proj = { MediaStore.Images.Media.DATA };
+        Cursor cursor = getActivity().managedQuery(contentUri, proj, null, null, null);
+        int column_index = cursor
+                .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        return cursor.getString(column_index);
+    }
 
+    public static Bitmap rotateImage(Bitmap source, float angle) {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(angle);
+        return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(),
+                matrix, true);
+    }
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-                Bundle extras = data.getExtras();
-                Bitmap imageBitmap = (Bitmap) extras.get("data");
-                bitmap = imageBitmap;
-                preview.setImageBitmap(imageBitmap);
-                mainActivityViewModel.setImage(imageBitmap);
+            try {
+                Bitmap thumbnail = MediaStore.Images.Media.getBitmap(
+                        getContext().getContentResolver(), imageUri);
+                String imageurl = getRealPathFromURI(imageUri);
+
+
+
+                ExifInterface ei = new ExifInterface(imageurl);
+                int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION,
+                        ExifInterface.ORIENTATION_UNDEFINED);
+
+                Bitmap rotatedBitmap = null;
+                switch(orientation) {
+
+                    case ExifInterface.ORIENTATION_ROTATE_90:
+                        rotatedBitmap = rotateImage(thumbnail, 90);
+                        break;
+
+                    case ExifInterface.ORIENTATION_ROTATE_180:
+                        rotatedBitmap = rotateImage(thumbnail, 180);
+                        break;
+
+                    case ExifInterface.ORIENTATION_ROTATE_270:
+                        rotatedBitmap = rotateImage(thumbnail, 270);
+                        break;
+
+                    case ExifInterface.ORIENTATION_NORMAL:
+                    default:
+                        rotatedBitmap = thumbnail;
+                }
+
+                bitmap = rotatedBitmap;
+                preview.setImageBitmap(rotatedBitmap);
+                mainActivityViewModel.setImage(rotatedBitmap);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+//                Bundle extras = data.getExtras();
+//                Bitmap imageBitmap = (Bitmap) extras.get("data");
+//                bitmap = imageBitmap;
+//                preview.setImageBitmap(imageBitmap);
+//                mainActivityViewModel.setImage(imageBitmap);
 
         } else if(requestCode == REQUEST_GET_FILE && resultCode == RESULT_OK){
             Uri uri = null;
@@ -387,7 +453,7 @@ public class AnalysisFragment extends Fragment {
                     }
 
                     String realPath = getPathFromUri(getContext(),uri);
-                    RecentsList.add(getContext(),realPath);
+//                    RecentsList.add(getContext(),realPath);
 
                 } else {
                     Toast.makeText(getContext(), "unsupported file type: "+ type, Toast.LENGTH_LONG).show();

@@ -49,8 +49,8 @@ public class DocumentsFragment extends Fragment {
 //            Log.e("========>>>>", sampleLists.get(0).toString());
 //        }
         sampleLists = (ArrayList<DocumentItem>) mainActivityViewModel.getLists();
-        sampleLists.add(new DocumentItem("sample...", "today"));
-        documentsAdapter = new DocumentsAdapter(getContext(), sampleLists);
+//        sampleLists.add(new DocumentItem("sample...", "today"));
+        documentsAdapter = new DocumentsAdapter(getContext(), sampleLists, mainActivityViewModel);
 // Attach the adapter to a ListView
         listView.setAdapter(documentsAdapter);
         return root;

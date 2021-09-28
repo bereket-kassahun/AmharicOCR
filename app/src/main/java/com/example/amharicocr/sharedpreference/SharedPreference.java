@@ -49,7 +49,7 @@ public class SharedPreference {
             Type type = new TypeToken<List<DocumentItem>>(){}.getType();
             arrayItems = gson.fromJson(serializedObject, type);
         }
-        Log.e("---------->>>>>", arrayItems.size()+"");
+//        Log.e("---------->>>>>", arrayItems.size()+"");
         return arrayItems;
     }
 

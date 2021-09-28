@@ -13,7 +13,7 @@
             title is use to add title to our list preferences.-->
         <!--this list preference is for remind me option-->
         <ListPreference
-            android:defaultValue="1"
+            android:defaultValue="amh"
             android:dialogTitle="@string/languages"
             android:entries="@array/pref_languages"
             android:entryValues="@array/pref_languages_value"
@@ -41,7 +41,7 @@
         <!--below list preference is use for
             double tap to seek option-->
         <ListPreference
-            android:defaultValue="1"
+            android:defaultValue="10"
             android:dialogTitle="@string/font_size"
             android:entries="@array/pref_font_size"
             android:entryValues="@array/pref_font_size_values"

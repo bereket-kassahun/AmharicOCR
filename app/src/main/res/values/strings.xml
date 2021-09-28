@@ -6,6 +6,67 @@
     <string name="profile">Profile</string>
     <string name="analysis">Analysis</string>
     <string name="title_edior">Edit</string>
+    <string name="title_settings">Setting</string>
     <string name="title_documents">Documents</string>
     <string name="vertical_ellipsis">&#8942;</string>
+    <string name="languages">Language</string>
+    <string name="languages_key">language</string>
+    <string name="font_size">Font Size</string>
+    <string name="font_size_key">Font Size</string>
+    <string name="uploads">Upload Option</string>
+    <string name="uploads_key">Upload Option</string>
+    <string name="select_camera">Camera</string>
+    <string name="input_file">File</string>
+    <string name="process_image">Process</string>
+
+    <string name="title_activity_welcome">Home Screen</string>
+    <string name="next">NEXT</string>
+    <string name="skip">SKIP</string>
+    <string name="start">GOT IT</string>
+
+    <string name="slide_1_title">Hello Food!</string>
+    <string name="slide_1_desc">The easiest way to order food from your favourite restaurant!</string>
+
+    <string name="slide_2_title">Movie Tickets</string>
+    <string name="slide_2_desc">Book movie tickets for your family and friends!</string>
+
+    <string name="slide_3_title">Great Discounts</string>
+    <string name="slide_3_desc">Best discounts on every single service we offer!</string>
+
+    <string name="slide_4_title">World Travel</string>
+    <string name="slide_4_desc">Book tickets of any transportation and travel the world!</string>
+
+
+    <string name="share_subject">Amharic OCR</string>
+    <string name="share_using">Everything</string>
+    <string-array name="pref_languages">
+        <item>amharic</item>
+        <item>english</item>
+    </string-array>
+    <string-array name="pref_languages_value">
+        <item>amh</item>
+        <item>eng</item>
+    </string-array>
+
+    <string-array name="pref_font_size">
+        <item>10</item>
+        <item>15</item>
+        <item>20</item>
+    </string-array>
+    <string-array name="pref_font_size_values">
+        <item>10</item>
+        <item>15</item>
+        <item>20</item>
+    </string-array>
+
+
+    <string-array name="pref_uploads">
+        <item>Only when on Wi-Fi</item>
+        <item>On any network</item>
+    </string-array>
+    <string-array name="pref_uploads_value">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
 </resources>

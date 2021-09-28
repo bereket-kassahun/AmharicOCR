@@ -2,7 +2,9 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:background="@color/cardview_dark_background"
+    android:layout_gravity="bottom">
 
     <com.google.android.flexbox.FlexboxLayout
 
@@ -12,30 +14,31 @@
         app:alignContent="stretch"
         app:alignItems="flex_end"
         app:flexDirection="column"
-
         app:justifyContent="space_between"
         tools:context=".ui.analysis.AnalysisFragment">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+<!--        <LinearLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:orientation="vertical">-->
 
-            <EditText
-                android:id="@+id/textView"
-                android:layout_width="match_parent"
-                android:layout_height="200dp"
-                android:gravity="top"
-                android:inputType="text|textMultiLine" />
+<!--&lt;!&ndash;            <EditText&ndash;&gt;-->
+<!--&lt;!&ndash;                android:id="@+id/textView"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:layout_width="match_parent"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:layout_height="200dp"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:gravity="top"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:inputType="text|textMultiLine" />&ndash;&gt;-->
 
-            <Button
-                android:layout_gravity="center_horizontal"
-                android:id="@+id/btn_save"
-                android:enabled="false"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Save" />
-        </LinearLayout>
+<!--&lt;!&ndash;            <Button&ndash;&gt;-->
+<!--&lt;!&ndash;                android:layout_gravity="center_horizontal"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:id="@+id/btn_save"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:enabled="false"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:layout_width="wrap_content"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:layout_height="wrap_content"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:text="Save" />&ndash;&gt;-->
+
+
+<!--        </LinearLayout>-->
 
         <ImageView
             android:id="@+id/preview"
@@ -52,28 +55,59 @@
             app:alignContent="space_between"
             app:alignItems="center"
             app:flexWrap="wrap"
+            android:layout_gravity="bottom"
             app:justifyContent="space_around">
+
+<!--            <Button-->
+<!--                android:id="@+id/capture"-->
+<!--                android:layout_width="150dp"-->
+<!--                android:layout_height="50dp"-->
+<!--                android:text="Capture"-->
+<!--                app:layout_alignSelf="center" />-->
 
             <Button
                 android:id="@+id/capture"
-                android:layout_width="150dp"
-                android:layout_height="50dp"
-                android:text="Capture"
-                app:layout_alignSelf="center" />
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/select_camera"
+                android:drawableLeft="@drawable/ic_baseline_camera_24"
+                style="?android:attr/borderlessButtonStyle"
+
+                android:textColor="@color/white"
+                />
 
             <Button
                 android:id="@+id/from_internal_storage"
-                android:layout_width="150dp"
-                android:layout_height="50dp"
-                android:text="Pick File"
-                app:layout_alignSelf="center" />
-
-
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/input_file"
+                android:drawableLeft="@drawable/ic_baseline_attach_file_24"
+                style="?android:attr/borderlessButtonStyle"
+                android:textColor="@color/white"
+                />
             <Button
                 android:id="@+id/convert"
-                android:layout_width="150dp"
-                android:layout_height="50dp"
-                android:text="Convert" />
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/process_image"
+                android:drawableLeft="@drawable/ic_baseline_label_important_24"
+                style="?android:attr/borderlessButtonStyle"
+                android:textColor="@color/white"
+                />
+<!--            -->
+<!--            <Button-->
+<!--                android:id="@+id/from_internal_storage"-->
+<!--                android:layout_width="150dp"-->
+<!--                android:layout_height="50dp"-->
+<!--                android:text="Pick File"-->
+<!--                app:layout_alignSelf="center" />-->
+
+
+<!--            <Button-->
+<!--                android:id="@+id/convert"-->
+<!--                android:layout_width="150dp"-->
+<!--                android:layout_height="50dp"-->
+<!--                android:text="Convert" />-->
 
         </com.google.android.flexbox.FlexboxLayout>
     </com.google.android.flexbox.FlexboxLayout>

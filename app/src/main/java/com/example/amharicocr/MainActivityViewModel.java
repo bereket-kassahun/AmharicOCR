@@ -20,12 +20,14 @@ public class MainActivityViewModel extends ViewModel {
     private MutableLiveData<String> result;
     private MutableLiveData<OCR> ocr_;
     private MutableLiveData<List<DocumentItem>> documents;
+    private MutableLiveData<DocumentItem> currentDocument;
 
     public MainActivityViewModel() {
         image = new MutableLiveData<Bitmap>();
         result = new MutableLiveData<>();
         ocr_ = new MutableLiveData<>();
         documents = new MutableLiveData<>();
+        currentDocument = new MutableLiveData<>();
         documents.setValue(new ArrayList<DocumentItem>());
     }
     public void setImage(Bitmap image){
@@ -57,5 +59,12 @@ public class MainActivityViewModel extends ViewModel {
     }
     public List<DocumentItem> getLists(){
         return documents.getValue();
+    }
+
+    public void setCurrentDocument(DocumentItem documentItem){
+        currentDocument.setValue(documentItem);
+    }
+    public LiveData<DocumentItem> getCurrentDocument(){
+        return currentDocument;
     }
 }

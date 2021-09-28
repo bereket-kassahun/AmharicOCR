@@ -90,14 +90,16 @@ public class MainActivity extends AppCompatActivity {
 
     private OCR ocr;
     SharedPreference preference;
+    static BottomNavigationView navView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        BottomNavigationView navView = findViewById(R.id.bottom_navigation);
+        navView = findViewById(R.id.bottom_navigation);
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(R.id.navigation_analysis).build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+
 
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
@@ -151,7 +153,6 @@ public class MainActivity extends AppCompatActivity {
                 new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.CAMERA},
                 REQUEST_APP_PERMISSION);
     }
-
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
@@ -222,5 +223,9 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
         preference.setList(mainActivityViewModel.getLists());
         Log.e("++++++++++++", mainActivityViewModel.getLists().size()+ "nice ");
+    }
+
+    public static void setNavigation(int id){
+        navView.setSelectedItemId(id);
     }
 }

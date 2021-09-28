@@ -21,6 +21,11 @@
         android:name="com.example.amharicocr.ui.documents.DocumentsFragment"
         android:label="@string/title_documents"
         tools:layout="@layout/documents_fragment" />
+    <fragment
+        android:id="@+id/navigation_settings"
+        android:name="com.example.amharicocr.settings.SettingsFragment"
+        android:label="@string/title_settings"
+        tools:layout="@layout/settings_fragment" />
 <!--    <fragment-->
 <!--        android:id="@+id/navigation_notifications"-->
 <!--        android:name="com.example.test_tab.ui.notifications.NotificationsFragment"-->

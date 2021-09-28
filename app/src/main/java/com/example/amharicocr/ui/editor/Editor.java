@@ -26,6 +26,7 @@ import com.example.amharicocr.OCR;
 import com.example.amharicocr.R;
 import com.example.amharicocr.Utils;
 import com.example.amharicocr.ui.analysis.AnalysisViewModel;
+import com.example.amharicocr.ui.documents.DocumentItem;
 import com.obsez.android.lib.filechooser.ChooserDialog;
 
 import org.jsoup.Jsoup;
@@ -44,6 +45,9 @@ import jp.wasabeef.richeditor.RichEditor;
 
 public class Editor extends Fragment {
 
+    boolean from_edit_document = false;
+    DocumentItem currentDocumentItem;
+
     private RichEditor mEditor;
     private TextView mPreview;
     public String savedText = "";
@@ -56,19 +60,23 @@ public class Editor extends Fragment {
         mEditor = (RichEditor) root.findViewById(R.id.editor);
         mEditor.setEditorHeight(700);
         mEditor.setEditorFontSize(22);
-        mEditor.setEditorFontColor(Color.RED);
+        mEditor.setEditorFontColor(Color.BLACK);
         //mEditor.setEditorBackgroundColor(Color.BLUE);
         //mEditor.setBackgroundColor(Color.BLUE);
         //mEditor.setBackgroundResource(R.drawable.bg);
         mEditor.setPadding(10, 10, 10, 10);
         //mEditor.setBackground("https://raw.githubusercontent.com/wasabeef/art/master/chip.jpg");
-        mEditor.setPlaceholder("Insert text here...");
+        mEditor.setPlaceholder("No text recognized yet...");
         //mEditor.setInputEnabled(false);
 //        mPreview = (TextView) root.findViewById(R.id.preview);
         mEditor.setOnTextChangeListener(new RichEditor.OnTextChangeListener() {
             @Override
             public void onTextChange(String text) {
-                savedText = text;
+                if(from_edit_document){
+                    currentDocumentItem.documentText = text;
+                }else{
+                    savedText = text;
+                }
             }
         });
 
@@ -330,9 +338,31 @@ public class Editor extends Fragment {
             @Override
             public void onChanged(String s) {
                 mEditor.setHtml(s);
+                from_edit_document = false;
+            }
+        });
+        mainActivityViewModel.getCurrentDocument().observe(getViewLifecycleOwner(), new Observer<DocumentItem>() {
+            @Override
+            public void onChanged(DocumentItem documentItem) {
+                mEditor.setHtml(documentItem.documentText);
+                currentDocumentItem = documentItem;
+                from_edit_document = true;
             }
         });
         return root;
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+//        Toast.makeText(getContext(), "on stop", Toast.LENGTH_SHORT).show();
+//        List<DocumentItem> documentItems = mainActivityViewModel.getLists();
+//        for(int i = 0; i < documentItems.size(); i++){
+//            if(currentDocumentItem.creationDate.equals(documentItems.get(i).creationDate)){
+//                documentItems.set(i, currentDocumentItem);
+//            }
+//        }
+
     }
 
     private void saveHtmlAsPdf(String str, String path){
