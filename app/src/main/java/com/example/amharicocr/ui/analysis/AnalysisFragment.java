@@ -22,7 +22,10 @@ import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.preference.PreferenceManager;
 import android.provider.DocumentsContract;
@@ -35,6 +38,8 @@ import android.view.ViewTreeObserver;
 import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -119,7 +124,7 @@ import com.google.gson.Gson;
 //}
 
 public class AnalysisFragment extends Fragment {
-
+    int MESSAGE_UPDATE_TEXT_CHILD_THREAD = 101;
     private OCR ocr;
     static final int REQUEST_IMAGE_CAPTURE = 1;
     static final int REQUEST_GET_FILE = 2;
@@ -133,7 +138,9 @@ public class AnalysisFragment extends Fragment {
 //    private TextView textView;
     private Bitmap bitmap = null;
     private List<DocumentItem> items = new ArrayList<>();
+    private Handler updateUIHandler;
 
+    ProgressBar progressBar;
     int finalHeight = 300, finalWidth = 300;
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mainActivityViewModel  = new ViewModelProvider(requireActivity()).get(MainActivityViewModel.class);
@@ -143,6 +150,7 @@ public class AnalysisFragment extends Fragment {
         pick  = root.findViewById(R.id.from_internal_storage);
         convert = root.findViewById(R.id.convert);
         preview = root.findViewById(R.id.preview);
+        progressBar = root.findViewById(R.id.progressBar1);
 //        textView = root.findViewById(R.id.textView);
 //        btnSave = root.findViewById(R.id.btn_save);
 
@@ -153,7 +161,7 @@ public class AnalysisFragment extends Fragment {
             public void onChanged(Bitmap bitmap_) {
                 preview.setImageBitmap(bitmap_);
                 bitmap = bitmap_;
-                Toast.makeText(getContext(), "lifecycle changed", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getContext(), "lifecycle changed", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -184,31 +192,82 @@ public class AnalysisFragment extends Fragment {
             }
         });
 
+        createUpdateUiHandler();
         convert.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                progressBar.setVisibility(View.VISIBLE);
                 if(bitmap != null){
-                    Mat tmp = convertBitmapToGray(bitmap);
-                    Mat temp = otsuTreshold(tmp);
-                    List<MatOfPoint> matOfPoints = getContours(temp);
-                    drawRectangles(temp, matOfPoints);
-                    Bitmap tmp1 = createBitmapfromMat(temp);
-                    preview.setImageBitmap(tmp1);
-                    mainActivityViewModel.setImage(tmp1);
-//                    Toast.makeText(getBaseContext(), ocr.getOCRResult(tmp1), Toast.LENGTH_LONG).show();
-                    String t = ocr.getOCRResult(bitmap);
-//                    textView.setText(t);
 
-                    mainActivityViewModel.setResult(t);
-
-                    DocumentItem i = new DocumentItem(t, new Date().toString());
-                    items.add(i);
-                    mainActivityViewModel.setDocuments(items);
-                    MainActivity.setNavigation(R.id.navigation_editor);
-//                    if(!t.isEmpty()){
-////                        btnSave.setEnabled(true);
-//                    }
+                    Thread workerThread = new Thread()
+                    {
+                        @Override
+                        public void run() {
+                            Mat tmp = convertBitmapToGray(bitmap);
+                            Mat temp = otsuTreshold(tmp);
+                            List<MatOfPoint> matOfPoints = getContours(temp);
+                            Log.e("00000000000000", "contours done");
+//                            drawRectangles(temp, matOfPoints);
+                            Log.e("00000000000000", "draw rectangle done");
+                            Bitmap tmp1 = createBitmapfromMat(temp);
+                            Log.e("00000000000000", "bitmap created done");
+                            //this might take a long time to complete so
+//                            new CountDownTimer(30000, 1000) {
+//
+//                                public void onTick(long millisUntilFinished) {
+////                                    mTextField.setText("seconds remaining: " + millisUntilFinished / 1000);
+//                                    //here you can have your logic to set text to edittext
+//                                }
+//
+//                                public void onFinish() {
+//
+////                                    mTextField.setText("done!");
+//                                }
+//
+//                            }.start();
+                            String t = ocr.getOCRResult(bitmap);
+                            Log.e("00000000000000", "ocr done");
+//                            preview.setImageBitmap(tmp1);
+//                            mainActivityViewModel.setImage(tmp1);
+                            // Can not update ui component directly when child thread run.
+                            // updateText();
+                            // Build message object.
+                            Message message = new Message();
+                            Bundle bundle = new Bundle();
+                            bundle.putCharSequence("result", t);
+                            bundle.putParcelable("BitmapImage",tmp1);
+                            message.setData(bundle);
+                            // Set message type.
+                            message.what = MESSAGE_UPDATE_TEXT_CHILD_THREAD;
+                            // Send message to main thread Handler.
+                            updateUIHandler.sendMessage(message);
+                        }
+                    };
+                    workerThread.start();
                 }
+
+//                if(bitmap != null){
+//                    Mat tmp = convertBitmapToGray(bitmap);
+//                    Mat temp = otsuTreshold(tmp);
+//                    List<MatOfPoint> matOfPoints = getContours(temp);
+//                    drawRectangles(temp, matOfPoints);
+//                    Bitmap tmp1 = createBitmapfromMat(temp);
+//                    preview.setImageBitmap(tmp1);
+//                    mainActivityViewModel.setImage(tmp1);
+////                    Toast.makeText(getBaseContext(), ocr.getOCRResult(tmp1), Toast.LENGTH_LONG).show();
+//                    String t = ocr.getOCRResult(bitmap);
+////                    textView.setText(t);
+//
+//                    mainActivityViewModel.setResult(t);
+//
+//                    DocumentItem i = new DocumentItem(t, new Date().toString());
+//                    items.add(i);
+//                    mainActivityViewModel.setDocuments(items);
+//                    MainActivity.setNavigation(R.id.navigation_editor);
+////                    if(!t.isEmpty()){
+//////                        btnSave.setEnabled(true);
+////                    }
+//                }
             }
         });
 //        final TextView textView = root.findViewById(R.id.text_dashboard);
@@ -299,8 +358,37 @@ public class AnalysisFragment extends Fragment {
         return root;
     }
 
+    private void createUpdateUiHandler()
+    {
+        if(updateUIHandler == null)
+        {
+            updateUIHandler = new Handler()
+            {
+                @Override
+                public void handleMessage(Message msg) {
+                    // Means the message is sent from child thread.
+                    if(msg.what == MESSAGE_UPDATE_TEXT_CHILD_THREAD)
+                    {
+                        // Update ui in main thread.
+                        updateText(msg);
+                    }
+                }
+            };
+        }
+    }
 
-
+    private void updateText(Message msg){
+        Bundle bundle = msg.getData();
+        preview.setImageBitmap((Bitmap)bundle.getParcelable("BitmapImage"));
+//        mainActivityViewModel.setResult(bundle.getString("result"));
+        mainActivityViewModel.setImage((Bitmap)bundle.getParcelable("BitmapImage"));
+        DocumentItem i = new DocumentItem(bundle.getString("result"), new Date().toString());
+        items.add(i);
+        mainActivityViewModel.setDocuments(items);
+        mainActivityViewModel.setCurrentDocument(i);
+        progressBar.setVisibility(View.GONE);
+        MainActivity.setNavigation(R.id.navigation_editor);
+    }
     Uri imageUri;
     private void dispatchTakePictureIntent() {
         ContentValues values = new ContentValues();
@@ -427,7 +515,7 @@ public class AnalysisFragment extends Fragment {
 
             if (data != null) {
                 uri = data.getData();
-                Toast.makeText(getContext(), "uri: "+ uri.toString(), Toast.LENGTH_LONG).show();
+//                Toast.makeText(getContext(), "uri: "+ uri.toString(), Toast.LENGTH_LONG).show();
 
                 ContentResolver cR = getContext().getContentResolver();
                 MimeTypeMap mime = MimeTypeMap.getSingleton();
@@ -436,15 +524,50 @@ public class AnalysisFragment extends Fragment {
                 if(type.equals("png") || type.equals("jpg") || type.equals("jpeg")){
                     try {
                         bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), uri);
+                        String path = getPathFromUri(getContext(), uri);
+                        ExifInterface exif = new ExifInterface(path);
+                        int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION,
+                        ExifInterface.ORIENTATION_UNDEFINED);
+
+                        switch(orientation) {
+
+                            case ExifInterface.ORIENTATION_ROTATE_90:
+                                bitmap = rotateImage(bitmap, 90);
+                                break;
+
+                            case ExifInterface.ORIENTATION_ROTATE_180:
+                                bitmap = rotateImage(bitmap, 180);
+                                break;
+
+                            case ExifInterface.ORIENTATION_ROTATE_270:
+                                bitmap = rotateImage(bitmap, 270);
+                                break;
+
+                            case ExifInterface.ORIENTATION_NORMAL:
+                            default:
+                                bitmap = bitmap;
+                        }
+
+//                        bitmap = rotateImage(bitmap, 90);
                     } catch (IOException e) {
-                        Toast.makeText(getContext(), "error making bitmap from file", Toast.LENGTH_LONG).show();
+//                        Toast.makeText(getContext(), "error making bitmap from file", Toast.LENGTH_LONG).show();
+                        AlertDialog alertDialog = new AlertDialog.Builder(getContext()).create();
+                        alertDialog.setTitle("Alert");
+                        alertDialog.setMessage("Error making bitmap from file");
+                        alertDialog.setButton(androidx.appcompat.app.AlertDialog.BUTTON_NEUTRAL, "OK",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                });
+                        alertDialog.show();
                         e.printStackTrace();
                     }
                 }
                 else if(type.equals("pdf")){
                     // convert to bitmap
                     try {
-                        Log.e("XXXX","getPathFromUri(getContext(),uri)): " + getPathFromUri(getContext(),uri));
+//                        Log.e("XXXX","getPathFromUri(getContext(),uri)): " + getPathFromUri(getContext(),uri));
                         bitmap = getMergedImagesOfPdf(new File(getPathFromUri(getContext(),uri)));
                     } catch (Exception e) {
                         Toast.makeText(getContext(), "error converting uri to path", Toast.LENGTH_LONG).show();
@@ -453,25 +576,98 @@ public class AnalysisFragment extends Fragment {
                     }
 
                     String realPath = getPathFromUri(getContext(),uri);
+
+
 //                    RecentsList.add(getContext(),realPath);
 
                 } else {
-                    Toast.makeText(getContext(), "unsupported file type: "+ type, Toast.LENGTH_LONG).show();
+//                    Toast.makeText(getContext(), "unsupported file type: "+ type, Toast.LENGTH_LONG).show();
+                    AlertDialog alertDialog = new AlertDialog.Builder(getContext()).create();
+                    alertDialog.setTitle("Alert");
+                    alertDialog.setMessage("unsupported file type");
+                    alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            });
+                    alertDialog.show();
                 }
 
                 if(bitmap == null) {
-                    Toast.makeText(getContext(), "bitmap is null", Toast.LENGTH_LONG).show();
+//                    Toast.makeText(getContext(), "bitmap is null", Toast.LENGTH_LONG).show();
+                    AlertDialog alertDialog = new AlertDialog.Builder(getContext()).create();
+                    alertDialog.setTitle("Alert");
+                    alertDialog.setMessage("bitmap is null");
+                    alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            });
+                    alertDialog.show();
                     return;
                 }
+
 
                 finalHeight=bitmap.getHeight();
                 Bitmap resizedBitmap = getResizedBitmap(bitmap, finalHeight, finalWidth);
 
+
+
+//                String imageurl = getRealPathFromURI(uri);
+//
+//
+//                ExifInterface ei = null;
+//                try {
+//                    ei = new ExifInterface(imageurl);
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//                int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION,
+//                        ExifInterface.ORIENTATION_UNDEFINED);
+//
+//                Bitmap rotatedBitmap = null;
+//                switch(orientation) {
+//
+//                    case ExifInterface.ORIENTATION_ROTATE_90:
+//                        rotatedBitmap = rotateImage(resizedBitmap, 90);
+//                        break;
+//
+//                    case ExifInterface.ORIENTATION_ROTATE_180:
+//                        rotatedBitmap = rotateImage(resizedBitmap, 180);
+//                        break;
+//
+//                    case ExifInterface.ORIENTATION_ROTATE_270:
+//                        rotatedBitmap = rotateImage(resizedBitmap, 270);
+//                        break;
+//
+//                    case ExifInterface.ORIENTATION_NORMAL:
+//                    default:
+//                        rotatedBitmap = resizedBitmap;
+//                }
+//
+//                bitmap = rotatedBitmap;
+//                preview.setImageBitmap(rotatedBitmap);
+//                mainActivityViewModel.setImage(rotatedBitmap);
+//
+
+                bitmap = resizedBitmap;
                 preview.setImageBitmap(resizedBitmap);
                 mainActivityViewModel.setImage(resizedBitmap);
 
             } else {
-                Toast.makeText(getContext(), "intent data is null", Toast.LENGTH_LONG).show();
+//                Toast.makeText(getContext(), "intent data is null", Toast.LENGTH_LONG).show();
+                AlertDialog alertDialog = new AlertDialog.Builder(getContext()).create();
+                alertDialog.setTitle("Alert");
+                alertDialog.setMessage("intent data is null");
+                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                alertDialog.show();
             }
         }
     }
@@ -482,6 +678,15 @@ public class AnalysisFragment extends Fragment {
         pickIntent.setType("*/*");
 
         startActivityForResult(pickIntent, REQUEST_GET_FILE);
+
+//        ContentValues values = new ContentValues();
+//        values.put(MediaStore.Images.Media.TITLE, "From internal storage");
+//        values.put(MediaStore.Images.Media.DESCRIPTION, "pdf png jpg");
+//        imageUri = getContext().getContentResolver().insert(
+//                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+//        Intent intent = new Intent(MediaStore.);
+//        intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+//        startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
     }
 
     public static Bitmap getResizedBitmap(Bitmap bm, int newHeight, int newWidth) {
@@ -663,97 +868,4 @@ public class AnalysisFragment extends Fragment {
     }
 
 
-
-    private void saveAsPdf(String str, String path){
-        PdfDocument document = new PdfDocument();
-        // crate a page description
-        PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(600, 1000, 1).create();
-        // start a page
-        PdfDocument.Page page = document.startPage(pageInfo);
-        Canvas canvas = page.getCanvas();
-        Paint paint = new Paint();
-        //  paint.setColor(Color.RED);
-        // canvas.drawCircle(50, 50, 30, paint);
-        Date currentTime = Calendar.getInstance().getTime();
-
-        paint.setColor(Color.BLACK);
-        // canvas.drawText(wise, 60, 50, paint);
-        int y=50;
-
-        canvas.drawText(str, 80, 50, paint);
-
-        canvas = page.getCanvas();
-        paint = new Paint();
-        // paint.setColor(Color.BLUE);
-        // canvas.drawCircle(100, 100, 100, paint);
-        document.finishPage(page);
-        // write the document content
-        String directory_path = path + "/";
-        File file = new File(directory_path);
-        if (!file.exists()) {
-            file.mkdirs();
-        }
-        String targetPdf = directory_path+"amharic-ocr-"+currentTime+".pdf";
-        File filePath = new File(targetPdf);
-        try {
-            document.writeTo(new FileOutputStream(filePath));
-            Toast.makeText(getContext(), "Pdf file generated in internal storage", Toast.LENGTH_LONG).show();
-        } catch (IOException e) {
-            Log.e("XXXX", "error "+e.toString());
-            Toast.makeText(getContext(), "Something wrong: " + e.toString(),  Toast.LENGTH_LONG).show();
-        }
-        // close the document
-        document.close();
-    }
-
-    private void saveAsTxt(String str, String path){
-        Date currentTime = Calendar.getInstance().getTime();
-
-        String directory_path = path + "/";
-        File file = new File(directory_path);
-        if (!file.exists()) {
-            file.mkdirs();
-        }
-        String targetTxt = directory_path+"amharic-ocr-"+currentTime+".txt";
-        File filePath = new File(targetTxt);
-
-        try {
-            FileOutputStream stream = new FileOutputStream(filePath);
-            stream.write(str.getBytes());
-            stream.close();
-            Toast.makeText(getContext(), "Txt file generated in internal storage", Toast.LENGTH_LONG).show();
-        } catch(Exception ex){
-            Log.e("XXXX", "error "+ex.toString());
-            Toast.makeText(getContext(), "Something wrong: " + ex.toString(),  Toast.LENGTH_LONG).show();
-        }
-    }
-
-    private void saveAsDoc(String str, String path)  {
-        Date currentTime = Calendar.getInstance().getTime();
-
-        String directory_path = path + "/";
-        File file = new File(directory_path);
-        if (!file.exists()) {
-            file.mkdirs();
-        }
-        String targetDoc = directory_path+"amharic-ocr-"+currentTime+".doc";
-        File filePath = new File(targetDoc);
-
-        try {
-            XWPFDocument xwpfDocument = new XWPFDocument();
-            FileOutputStream fileOutputStream = new FileOutputStream(filePath);
-            XWPFParagraph xwpfParagraph = xwpfDocument.createParagraph();
-            XWPFRun xwpfRun = xwpfParagraph.createRun();
-
-            xwpfRun.setText(str);
-
-            xwpfDocument.write(fileOutputStream);
-            fileOutputStream.close();
-
-            Toast.makeText(getContext(), "Doc file generated in internal storage", Toast.LENGTH_LONG).show();
-        } catch(Exception ex){
-            Log.e("XXXX", "error "+ex.toString());
-            Toast.makeText(getContext(), "Something wrong: " + ex.toString(),  Toast.LENGTH_LONG).show();
-        }
-    }
    }

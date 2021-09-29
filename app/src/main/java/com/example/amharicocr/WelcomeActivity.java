@@ -3,10 +3,14 @@ package com.example.amharicocr;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,10 +19,15 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
+
+import com.example.amharicocr.sharedpreference.SharedPreference;
+
+import java.util.Locale;
 
 public class WelcomeActivity extends Activity {
 
@@ -32,6 +41,18 @@ public class WelcomeActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+//        SharedPreference preference = new SharedPreference(getBaseContext());
+        SharedPreference preferences = new SharedPreference(getBaseContext());
+
+//        Toast.makeText(getBaseContext(), preferences.getString("language", "shit"), Toast.LENGTH_SHORT).show();
+        String languageToLoad  = preferences.getLanguage();
+        Locale locale = new Locale(languageToLoad);
+        Locale.setDefault(locale);
+        Configuration config = new Configuration();
+        config.locale = locale;
+        getBaseContext().getResources().updateConfiguration(config,
+                getBaseContext().getResources().getDisplayMetrics());
+
         super.onCreate(savedInstanceState);
 
         // Checking for first time launch - before calling setContentView()
@@ -202,5 +223,18 @@ public class WelcomeActivity extends Activity {
             View view = (View) object;
             container.removeView(view);
         }
+    }
+
+    public void setLocale(String lang) {
+        Locale myLocale = new Locale(lang);
+        Resources res = getResources();
+        DisplayMetrics dm = res.getDisplayMetrics();
+        Configuration conf = res.getConfiguration();
+        conf.locale = myLocale;
+        res.updateConfiguration(conf, dm);
+//        Intent refresh = new Intent(this, MainActivity.class);
+//        finish();
+//        startActivity(refresh);
+        recreate();
     }
 }

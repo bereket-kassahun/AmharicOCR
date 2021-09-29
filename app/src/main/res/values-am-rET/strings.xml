@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ምስል ወደ ጽሑፍ</string>
+    <string name="home">ቤት</string>
+    <string name="activity">እንቅስቃሴ</string>
+    <string name="setting">ቅንብር</string>
+    <string name="profile">መገለጫ</string>
+    <string name="analysis">ትንተና</string>
+    <string name="title_edior">ለውጥ</string>
+    <string name="title_settings">ቅንብር</string>
+    <string name="title_documents">ሰነዶች</string>
+    <string name="vertical_ellipsis">&#8942;</string>
+    <string name="languages">ቋንቋ</string>
+    <string name="languages_key">language</string>
+    <string name="font_size">የቅርጸ ቁምፊ መጠን</string>
+    <string name="font_size_key">Font Size</string>
+    <string name="uploads">የመጫኛ አማራጭ</string>
+    <string name="uploads_key">Upload Option</string>
+    <string name="select_camera">ካሜራ</string>
+    <string name="input_file">ፋይል</string>
+    <string name="process_image">ሂደት</string>
+
+    <string name="title_activity_welcome">መነሻ ማያ ገጽ</string>
+    <string name="next">ቀጣይ</string>
+    <string name="skip">ዝለል</string>
+    <string name="start">ገባኝ</string>
+
+<!--    <string name="slide_1_title">ስዕል!</string>-->
+<!--    <string name="slide_1_desc">ምስልዎ በጽሑፍ ላይ እንዲያተኩር ያድርጉ!</string>-->
+
+<!--    <string name="slide_2_title">ፋይሎች</string>-->
+<!--    <string name="slide_2_desc">ከ 2 ገጾች በላይ የፒዲኤፍ ፋይሎችን አያስገቡ!</string>-->
+
+<!--    <string name="slide_3_title">ጽሑፍ</string>-->
+<!--    <string name="slide_3_desc">የጽሑፍዎን ዘይቤ ለማቆየት አርታኢውን ይጠቀሙ</string>-->
+
+<!--    <string name="slide_4_title">ምስል</string>-->
+<!--    <string name="slide_4_desc">በግቤት ምስሎችዎ ውስጥ ስዕላዊ መግለጫዎችን አያካትቱ!</string>-->
+
+
+    <string name="share_subject">Amharic OCR</string>
+    <string name="share_using">Everything</string>
+
+    <string name="intro_1">ምስሎችዎን በትኩረት እና በብሩህ አካባቢ ይያዙ</string>
+    <string name="intro_2">JPG PNG ፒዲኤፍ እንደ ግብዓት የሚደገፉ ፋይሎች ናቸው</string>
+    <string name="intro_3">ይህ ትግበራ የአማርኛ ጽሑፎችን ብቻ ነው የሚያውቀው</string>
+    <string name="intro_4">በግቤት ስዕሎችዎ ወይም በፒዲኤፍዎ ውስጥ ስዕሎችን አያካትቱ</string>
+
+    <string name="intro_1_title">የተሻለ አፈፃፀም</string>
+    <string name="intro_2_title">ግብዓቶች</string>
+    <string name="intro_3_title">ድጋፍ</string>
+    <string name="intro_4_title">ለአማርኛ የተሰራ ነው</string>
+
+
+
+    <string-array name="pref_languages">
+        <item>አማርኛ</item>
+        <item>english</item>
+    </string-array>
+    <string-array name="pref_languages_value">
+        <item>am</item>
+        <item>en</item>
+    </string-array>
+
+    <string-array name="pref_font_size">
+        <item>10</item>
+        <item>15</item>
+        <item>20</item>
+    </string-array>
+    <string-array name="pref_font_size_values">
+        <item>10</item>
+        <item>15</item>
+        <item>20</item>
+    </string-array>
+
+
+    <string-array name="pref_uploads">
+        <item>Only when on Wi-Fi</item>
+        <item>On any network</item>
+    </string-array>
+    <string-array name="pref_uploads_value">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
+</resources>

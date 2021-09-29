@@ -53,6 +53,23 @@ public class SharedPreference {
         return arrayItems;
     }
 
+    public void setLanguage(String locale){
+        editor = prefs.edit();
+        editor.putString("language", locale);
+        editor.commit();
+    }
+    public String getLanguage(){
+        return prefs.getString("language", "am");
+    }
+
+    public void setFontSize(int size){
+        editor = prefs.edit();
+        editor.putInt("font_size", size);
+        editor.commit();
+    }
+    public int getFontSize(){
+        return prefs.getInt("font_size", 10);
+    }
 //    static void add(Context context, String path){
 //        android.content.SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 //        android.content.SharedPreferences.Editor editor = prefs.edit();

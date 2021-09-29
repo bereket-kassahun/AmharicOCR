@@ -1,8 +1,16 @@
 package com.example.amharicocr.ui.documents;
 
+import android.app.AlertDialog;
+import android.app.SearchManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.pdf.PdfDocument;
 import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -18,8 +26,18 @@ import androidx.appcompat.widget.PopupMenu;
 import com.example.amharicocr.MainActivity;
 import com.example.amharicocr.MainActivityViewModel;
 import com.example.amharicocr.R;
+import com.obsez.android.lib.filechooser.ChooserDialog;
 
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.apache.poi.xwpf.usermodel.XWPFRun;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 public class DocumentsAdapter extends ArrayAdapter<DocumentItem> {
     private PopupMenu popup;
@@ -80,8 +98,11 @@ public class DocumentsAdapter extends ArrayAdapter<DocumentItem> {
                                 notifyDataSetInvalidated();
                                 break;
                             case R.id.search:
+                                search(documentItem.documentText);
                                 break;
-
+                            case R.id.export:
+                                exporter(documentItem.documentText);
+                                break;
                         }
                         return false;
                     }
@@ -94,5 +115,203 @@ public class DocumentsAdapter extends ArrayAdapter<DocumentItem> {
         date.setText(documentItem.creationDate);
         // Return the completed view to render on screen
         return convertView;
+    }
+    protected  void search(String text){
+//        String url = text;
+//        Intent i = new Intent(Intent.ACTION_WEB_SEARCH);
+//        i.setData(Uri.parse(url));
+//        getContext().startActivity(i);
+
+        Intent intent = new Intent(Intent.ACTION_WEB_SEARCH );
+        intent.putExtra(SearchManager.QUERY, text);
+        getContext().startActivity(intent);
+    }
+    protected void exporter(String text){
+//                String text = textView.getText().toString();
+                Log.e("XXXX","saving: "+ text);
+
+                // setup the alert builder
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                builder.setTitle("Save as");
+                builder.setMessage("What format do you want to save this text?");
+
+                // add the buttons
+                builder.setNegativeButton("txt", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        new ChooserDialog(getContext())
+                                // to handle the result(s)
+                                .withFilter(true, true)
+                                .withChosenListener(new ChooserDialog.Result() {
+                                    @Override
+                                    public void onChoosePath(String path, File pathFile) {
+                                        saveAsTxt(text,path);
+                                    }
+                                })
+                                .build()
+                                .show();
+                    }
+                });
+                builder.setNeutralButton("doc", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        new ChooserDialog(getContext())
+                                // to handle the result(s)
+                                .withFilter(true, true)
+                                .withChosenListener(new ChooserDialog.Result() {
+                                    @Override
+                                    public void onChoosePath(String path, File pathFile) {
+                                        saveAsDoc(text,path);
+                                    }
+                                })
+                                .build()
+                                .show();
+                    }
+                });
+                builder.setPositiveButton("pdf", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        new ChooserDialog(getContext())
+                                // to handle the result(s)
+                                .withFilter(true, true)
+                                .withChosenListener(new ChooserDialog.Result() {
+                                    @Override
+                                    public void onChoosePath(String path, File pathFile) {
+                                        saveAsPdf(text,path);
+                                    }
+                                })
+                                .build()
+                                .show();
+                    }
+                });
+
+                // create and show the alert dialog
+                AlertDialog dialog = builder.create();
+                dialog.show();
+//
+    }
+
+
+    private void saveAsPdf(String str, String path){
+        PdfDocument document = new PdfDocument();
+        // crate a page description
+        PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(600, 1000, 1).create();
+        // start a page
+        PdfDocument.Page page = document.startPage(pageInfo);
+        Canvas canvas = page.getCanvas();
+        Paint paint = new Paint();
+        //  paint.setColor(Color.RED);
+        // canvas.drawCircle(50, 50, 30, paint);
+        Date currentTime = Calendar.getInstance().getTime();
+
+        paint.setColor(Color.BLACK);
+        // canvas.drawText(wise, 60, 50, paint);
+        int y=50;
+
+        canvas.drawText(str, 80, 50, paint);
+
+        canvas = page.getCanvas();
+        paint = new Paint();
+        // paint.setColor(Color.BLUE);
+        // canvas.drawCircle(100, 100, 100, paint);
+        document.finishPage(page);
+        // write the document content
+        String directory_path = path + "/";
+        File file = new File(directory_path);
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+        String targetPdf = directory_path+"amharic-ocr-"+currentTime+".pdf";
+        File filePath = new File(targetPdf);
+        try {
+            document.writeTo(new FileOutputStream(filePath));
+//            Toast.makeText(getContext(), "Pdf file generated in internal storage", Toast.LENGTH_LONG).show();
+            androidx.appcompat.app.AlertDialog alertDialog = new androidx.appcompat.app.AlertDialog.Builder(getContext()).create();
+            alertDialog.setTitle("Alert");
+            alertDialog.setMessage("Pdf file generated in internal storage");
+            alertDialog.setButton(androidx.appcompat.app.AlertDialog.BUTTON_NEUTRAL, "OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+            alertDialog.show();
+        } catch (IOException e) {
+            Log.e("XXXX", "error "+e.toString());
+            Toast.makeText(getContext(), "Something wrong: " + e.toString(),  Toast.LENGTH_LONG).show();
+        }
+        // close the document
+        document.close();
+    }
+
+    private void saveAsTxt(String str, String path){
+        Date currentTime = Calendar.getInstance().getTime();
+
+        String directory_path = path + "/";
+        File file = new File(directory_path);
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+        String targetTxt = directory_path+"amharic-ocr-"+currentTime+".txt";
+        File filePath = new File(targetTxt);
+
+        try {
+            FileOutputStream stream = new FileOutputStream(filePath);
+            stream.write(str.getBytes());
+            stream.close();
+//            Toast.makeText(getContext(), "Txt file generated in internal storage", Toast.LENGTH_LONG).show();
+            androidx.appcompat.app.AlertDialog alertDialog = new androidx.appcompat.app.AlertDialog.Builder(getContext()).create();
+            alertDialog.setTitle("Alert");
+            alertDialog.setMessage("Txt file generated in internal storage");
+            alertDialog.setButton(androidx.appcompat.app.AlertDialog.BUTTON_NEUTRAL, "OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+            alertDialog.show();
+        } catch(Exception ex){
+            Log.e("XXXX", "error "+ex.toString());
+            Toast.makeText(getContext(), "Something wrong: " + ex.toString(),  Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void saveAsDoc(String str, String path)  {
+        Date currentTime = Calendar.getInstance().getTime();
+
+        String directory_path = path + "/";
+        File file = new File(directory_path);
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+        String targetDoc = directory_path+"amharic-ocr-"+currentTime+".doc";
+        File filePath = new File(targetDoc);
+
+        try {
+            XWPFDocument xwpfDocument = new XWPFDocument();
+            FileOutputStream fileOutputStream = new FileOutputStream(filePath);
+            XWPFParagraph xwpfParagraph = xwpfDocument.createParagraph();
+            XWPFRun xwpfRun = xwpfParagraph.createRun();
+
+            xwpfRun.setText(str);
+
+            xwpfDocument.write(fileOutputStream);
+            fileOutputStream.close();
+
+//            Toast.makeText(getContext(), "Doc file generated in internal storage", Toast.LENGTH_LONG).show();
+            androidx.appcompat.app.AlertDialog alertDialog = new androidx.appcompat.app.AlertDialog.Builder(getContext()).create();
+            alertDialog.setTitle("Alert");
+            alertDialog.setMessage("Doc file generated in internal storage");
+            alertDialog.setButton(androidx.appcompat.app.AlertDialog.BUTTON_NEUTRAL, "OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+            alertDialog.show();
+        } catch(Exception ex){
+            Log.e("XXXX", "error "+ex.toString());
+            Toast.makeText(getContext(), "Something wrong: " + ex.toString(),  Toast.LENGTH_LONG).show();
+        }
     }
 }

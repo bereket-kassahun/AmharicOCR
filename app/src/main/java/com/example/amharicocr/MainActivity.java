@@ -9,14 +9,18 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Looper;
 import android.provider.MediaStore;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -48,6 +52,7 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
     static {
@@ -201,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
                 TestService testService = (TestService) client.getGlobal(TestService.class);
                 String msg = testService.getResponse("what the hell is wrong with u (:-()");
                 //Toast.makeText(MainActivity.this, testService.getResponse("abc"), Toast.LENGTH_SHORT).show();
-                Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
 //                client.close();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -224,6 +229,29 @@ public class MainActivity extends AppCompatActivity {
         preference.setList(mainActivityViewModel.getLists());
         Log.e("++++++++++++", mainActivityViewModel.getLists().size()+ "nice ");
     }
+
+
+    private void restartActivity() {
+        Intent intent = getIntent();
+        finish();
+        startActivity(intent);
+    }
+
+    public void setLocale(String lang) {
+        Locale myLocale = new Locale(lang);
+        Resources res = getResources();
+        DisplayMetrics dm = res.getDisplayMetrics();
+        Configuration conf = res.getConfiguration();
+        conf.locale = myLocale;
+        res.updateConfiguration(conf, dm);
+//        Intent refresh = new Intent(this, MainActivity.class);
+//        finish();
+//        startActivity(refresh);
+        restartActivity();
+    }
+
+
+
 
     public static void setNavigation(int id){
         navView.setSelectedItemId(id);

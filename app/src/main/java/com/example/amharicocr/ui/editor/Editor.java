@@ -25,6 +25,7 @@ import com.example.amharicocr.MainActivityViewModel;
 import com.example.amharicocr.OCR;
 import com.example.amharicocr.R;
 import com.example.amharicocr.Utils;
+import com.example.amharicocr.sharedpreference.SharedPreference;
 import com.example.amharicocr.ui.analysis.AnalysisViewModel;
 import com.example.amharicocr.ui.documents.DocumentItem;
 import com.obsez.android.lib.filechooser.ChooserDialog;
@@ -50,16 +51,20 @@ public class Editor extends Fragment {
 
     private RichEditor mEditor;
     private TextView mPreview;
-    public String savedText = "";
+    public String htmlText = "";
 
     private MainActivityViewModel mainActivityViewModel;
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mainActivityViewModel  = new ViewModelProvider(requireActivity()).get(MainActivityViewModel.class);
+
         View root = inflater.inflate(R.layout.editor_fragment, container, false);
-      
+
+        SharedPreference preference = new SharedPreference(getContext());
+//        Toast.makeText(getContext(), preference.getFontSize()+"", Toast.LENGTH_SHORT).show();
+
         mEditor = (RichEditor) root.findViewById(R.id.editor);
         mEditor.setEditorHeight(700);
-        mEditor.setEditorFontSize(22);
+        mEditor.setEditorFontSize(preference.getFontSize()+5);
         mEditor.setEditorFontColor(Color.BLACK);
         //mEditor.setEditorBackgroundColor(Color.BLUE);
         //mEditor.setBackgroundColor(Color.BLUE);
@@ -72,11 +77,9 @@ public class Editor extends Fragment {
         mEditor.setOnTextChangeListener(new RichEditor.OnTextChangeListener() {
             @Override
             public void onTextChange(String text) {
-                if(from_edit_document){
-                    currentDocumentItem.documentText = text;
-                }else{
-                    savedText = text;
-                }
+                Document t = Jsoup.parse(text);
+                currentDocumentItem.documentText = t.text();
+                htmlText = text;
             }
         });
 
@@ -97,7 +100,7 @@ public class Editor extends Fragment {
         root.findViewById(R.id.action_save).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Document doc = Jsoup.parse(savedText);
+//                Document doc = Jsoup.parse(htmlText);
 
                 new ChooserDialog(getContext())
                 // to handle the result(s)
@@ -105,7 +108,7 @@ public class Editor extends Fragment {
                 .withChosenListener(new ChooserDialog.Result() {
                     @Override
                     public void onChoosePath(String path, File pathFile) {
-                        Utils.saveAsHtml(doc.text(), path);
+                        saveAsTxt(htmlText, path);
                     }
                 })
                 .build()
@@ -334,19 +337,22 @@ public class Editor extends Fragment {
 //            }
 //        });
 
-        mainActivityViewModel.getResult().observe(getViewLifecycleOwner(), new Observer<String>() {
-            @Override
-            public void onChanged(String s) {
-                mEditor.setHtml(s);
-                from_edit_document = false;
-            }
-        });
+//        mainActivityViewModel.getResult().observe(getViewLifecycleOwner(), new Observer<String>() {
+//            @Override
+//            public void onChanged(String s) {
+////                mEditor.setHtml(s);
+//                mEditor.setHtml("nothing");
+//                Toast.makeText(getContext(), "changed!", Toast.LENGTH_SHORT).show();
+//                savedText = s;
+//                from_edit_document = false;
+//            }
+//        });
         mainActivityViewModel.getCurrentDocument().observe(getViewLifecycleOwner(), new Observer<DocumentItem>() {
             @Override
             public void onChanged(DocumentItem documentItem) {
                 mEditor.setHtml(documentItem.documentText);
                 currentDocumentItem = documentItem;
-                from_edit_document = true;
+//                from_edit_document = true;
             }
         });
         return root;
@@ -368,6 +374,28 @@ public class Editor extends Fragment {
     private void saveHtmlAsPdf(String str, String path){
 
     }
+    private void saveAsTxt(String str, String path){
+        Date currentTime = Calendar.getInstance().getTime();
+
+        String directory_path = path + "/";
+        File file = new File(directory_path);
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+        String targetTxt = directory_path+"amharic-ocr-"+currentTime+".html";
+        File filePath = new File(targetTxt);
+
+        try {
+            FileOutputStream stream = new FileOutputStream(filePath);
+            stream.write(str.getBytes());
+            stream.close();
+            Toast.makeText(getContext(), "HTML file generated in internal storage", Toast.LENGTH_LONG).show();
+        } catch(Exception ex){
+            Log.e("XXXX", "error "+ex.toString());
+            Toast.makeText(getContext(), "Something wrong: " + ex.toString(),  Toast.LENGTH_LONG).show();
+        }
+    }
+
     private void saveAsPdf(String str, String path){
         PdfDocument document = new PdfDocument();
         // crate a page description

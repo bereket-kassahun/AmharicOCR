@@ -39,15 +39,26 @@
 
 
 <!--        </LinearLayout>-->
-
-        <ImageView
-            android:id="@+id/preview"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:adjustViewBounds="true"
-            android:scaleType="centerCrop"
-            app:layout_flexGrow="1" />
+            android:layout_height="wrap_content">
+            <ImageView
+                android:id="@+id/preview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:scaleType="centerCrop"
+                app:layout_flexGrow="1" />
 
+            <ProgressBar
+                android:id="@+id/progressBar1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_centerHorizontal="true"
+                android:visibility="gone"/>
+
+        </RelativeLayout>
 
         <com.google.android.flexbox.FlexboxLayout
             android:layout_width="match_parent"
@@ -72,8 +83,8 @@
                 android:text="@string/select_camera"
                 android:drawableLeft="@drawable/ic_baseline_camera_24"
                 style="?android:attr/borderlessButtonStyle"
-
                 android:textColor="@color/white"
+
                 />
 
             <Button

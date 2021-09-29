@@ -13,7 +13,7 @@
             title is use to add title to our list preferences.-->
         <!--this list preference is for remind me option-->
         <ListPreference
-            android:defaultValue="amh"
+            android:defaultValue="am"
             android:dialogTitle="@string/languages"
             android:entries="@array/pref_languages"
             android:entryValues="@array/pref_languages_value"
